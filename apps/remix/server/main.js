@@ -46,4 +46,5 @@ const handler = handle(build, server, { getLoadContext });
 
 const port = parseInt(process.env.PORT || '3000', 10);
 
-serve({ fetch: handler.fetch, port });
+// Shiftstone: HOST (e.g. 127.0.0.1 for staging behind a tunnel) keeps the port off public interfaces.
+serve({ fetch: handler.fetch, port, ...(process.env.HOST ? { hostname: process.env.HOST } : {}) });
