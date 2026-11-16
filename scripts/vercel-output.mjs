@@ -49,10 +49,13 @@ addDir('node_modules/.prisma/client'); // generated client + query engines
 addDir('node_modules/@prisma/client');
 
 // Never ship test browsers or other platforms' engines.
+// Vercel's runtime is glibc x64 + Postgres via Prisma's library engine: the rest is dead weight (250 MB limit).
 const skip = (f) =>
   /(^|\/)(playwright-core\/\.local-browsers|ms-playwright)\//.test(f) ||
   /libquery_engine-(darwin|debian|linux-musl|windows)/.test(f) ||
-  /\.map$/.test(f);
+  /node_modules\/@napi-rs\/canvas-linux-x64-musl\//.test(f) ||
+  /node_modules\/(@prisma\/client\/runtime|\.prisma\/client)\/.*(wasm|edge|react-native)/.test(f) ||
+  /\.(map|d\.ts|d\.mts|d\.cts|md)$/.test(f);
 
 let bytes = 0;
 for (const f of files) {
