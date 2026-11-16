@@ -1,6 +1,7 @@
 import { prisma } from '@documenso/prisma';
 import { sha256 } from '@noble/hashes/sha2';
 import { BackgroundJobStatus, Prisma } from '@prisma/client';
+import { waitUntil } from '@vercel/functions';
 import { CronExpressionParser } from 'cron-parser';
 import type { Context as HonoContext } from 'hono';
 
@@ -112,6 +113,23 @@ export class LocalJobProvider extends BaseJobProvider {
     tick();
 
     console.log(`[JOBS]: Started cron poller for ${this._cronJobs.length} job(s)`);
+  }
+
+  /**
+   * Shiftstone (Vercel): serverless instances don't keep the 30-second poller alive, so Vercel Cron calls
+   * /api/cron/jobs instead. Each call looks back `lookbackMs` for due slots; the deterministic BackgroundJob ids
+   * make overlapping calls safe (a slot is only enqueued once).
+   */
+  public override async runCronOnce(lookbackMs: number) {
+    const since = new Date(Date.now() - lookbackMs);
+
+    for (const cronJob of this._cronJobs) {
+      if (cronJob.lastTickAt > since) {
+        cronJob.lastTickAt = since;
+      }
+    }
+
+    await this.processCronTick();
   }
 
   private async processCronTick() {
@@ -376,12 +394,20 @@ export class LocalJobProvider extends BaseJobProvider {
     }
 
     console.log('Submitting job to endpoint:', endpoint);
+    const request = fetch(endpoint, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers,
+    }).catch(() => null);
+
+    // Shiftstone (Vercel): a serverless function can be frozen right after it responds, so tell the platform to keep
+    // it alive until the job request is out. No-op outside Vercel.
+    if (process.env.VERCEL) {
+      waitUntil(request);
+    }
+
     await Promise.race([
-      fetch(endpoint, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers,
-      }).catch(() => null),
+      request,
       new Promise((resolve) => {
         setTimeout(resolve, 150);
       }),

@@ -39,4 +39,9 @@ export class JobClient<T extends ReadonlyArray<JobDefinition> = []> {
   public startCron() {
     this._provider.startCron();
   }
+
+  /** Shiftstone (Vercel): one cron sweep, called by Vercel Cron through /api/cron/jobs. */
+  public async runCronOnce(lookbackMs: number) {
+    return this._provider.runCronOnce(lookbackMs);
+  }
 }

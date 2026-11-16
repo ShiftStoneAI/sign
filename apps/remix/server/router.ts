@@ -137,6 +137,19 @@ app.route('/api/csc', csc);
 app.route('/api/v1', tsRestHonoApp);
 app.use('/api/jobs/*', jobsClient.getApiHandler());
 
+// Shiftstone (Vercel): Vercel Cron calls this every 5 minutes with `Authorization: Bearer $CRON_SECRET`.
+app.get('/api/cron/jobs', async (c) => {
+  const secret = process.env.CRON_SECRET;
+
+  if (!secret || c.req.header('authorization') !== `Bearer ${secret}`) {
+    return c.text('Unauthorized', 401);
+  }
+
+  await jobsClient.runCronOnce(20 * 60_000);
+
+  return c.json({ ok: true });
+});
+
 app.use('/api/trpc/*', trpcRateLimitMiddleware);
 app.use('/api/trpc/*', reactRouterTrpcServer);
 
@@ -171,7 +184,9 @@ void LicenseClient.start();
 
 // Start cron scheduler for background jobs (e.g. envelope expiration sweep).
 // No-op for Inngest provider which handles cron externally.
-jobsClient.startCron();
+if (!process.env.VERCEL) {
+  jobsClient.startCron();
+}
 
 void migrateDeletedAccountServiceAccount();
 void migrateLegacyServiceAccount();
