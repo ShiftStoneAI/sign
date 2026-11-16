@@ -72,7 +72,9 @@ declare namespace NodeJS {
     NEXT_PUBLIC_SIGNING_CONTACT_INFO?: string;
     NEXT_PRIVATE_USE_LEGACY_SIGNING_SUBFILTER?: string;
 
-    NEXT_PRIVATE_SMTP_TRANSPORT?: 'mailchannels' | 'resend' | 'smtp-auth' | 'smtp-api';
+    NEXT_PRIVATE_SMTP_TRANSPORT?: 'mailchannels' | 'resend' | 'smtp-auth' | 'smtp-api' | 'gmail-api';
+    NEXT_PRIVATE_GMAIL_OAUTH?: string;
+    CRON_SECRET?: string;
 
     NEXT_PRIVATE_RESEND_API_KEY?: string;
 

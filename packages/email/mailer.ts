@@ -3,6 +3,7 @@ import { ResendTransport } from '@documenso/nodemailer-resend';
 import type { Transporter } from 'nodemailer';
 import { createTransport } from 'nodemailer';
 
+import { GmailApiTransport } from './transports/gmail-api';
 import { MailChannelsTransport } from './transports/mailchannels';
 
 /**
@@ -52,6 +53,15 @@ import { MailChannelsTransport } from './transports/mailchannels';
  */
 const getTransport = (): Transporter => {
   const transport = env('NEXT_PRIVATE_SMTP_TRANSPORT') ?? 'smtp-auth';
+
+  // Shiftstone: send as hello@ through the Gmail API (send-only OAuth sign-in).
+  if (transport === 'gmail-api') {
+    if (!env('NEXT_PRIVATE_GMAIL_OAUTH')) {
+      throw new Error('Gmail API transport requires NEXT_PRIVATE_GMAIL_OAUTH');
+    }
+
+    return createTransport(GmailApiTransport.makeTransport(env('NEXT_PRIVATE_GMAIL_OAUTH') ?? ''));
+  }
 
   if (transport === 'mailchannels') {
     return createTransport(
