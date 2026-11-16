@@ -55,7 +55,8 @@ const skip = (f) =>
   /libquery_engine-(darwin|debian|linux-musl|windows)/.test(f) ||
   /node_modules\/@napi-rs\/canvas-linux-x64-musl\//.test(f) ||
   /node_modules\/(@prisma\/client\/runtime|\.prisma\/client)\/.*(wasm|edge|react-native)/.test(f) ||
-  /\.(map|d\.ts|d\.mts|d\.cts|md)$/.test(f);
+  /\.(map|d\.ts|d\.mts|d\.cts|md)$/.test(f) ||
+  /^apps\/remix\/public\//.test(f); // copied to the function root below (the server reads cwd/public)
 
 let bytes = 0;
 for (const f of files) {
@@ -111,7 +112,17 @@ writeFileSync(
   ),
 );
 
-console.log(`[vercel-output] function: ${files.size} files, ${(bytes / 1e6).toFixed(1)} MB (limit 250 MB unzipped)`);
+let total = 0;
+for (const f of readdirSync(func, { recursive: true })) {
+  const abs = path.join(func, String(f));
+  if (statSync(abs).isFile()) {
+    total += statSync(abs).size;
+  }
+}
+console.log(`[vercel-output] function: ${(total / 1e6).toFixed(1)} MB (Vercel limit 250 MB unzipped)`);
+if (total > 245e6) {
+  throw new Error('Function too big for Vercel');
+}
 for (const w of warnings) {
   if (!String(w.message).includes('Failed to resolve dependency')) {
     console.log('[nft]', w.message);
