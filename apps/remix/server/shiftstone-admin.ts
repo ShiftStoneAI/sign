@@ -13,8 +13,8 @@
  *   POST   /orgs                       { name, ownerEmail, plan? } a shared organisation + one team (plan default enterprise)
  *   PATCH  /orgs/:id                   { plan } applies a plan's limits and features (enterprise = no limits)
  *   POST   /orgs/:id/members           { email, role? } adds an existing user (no email sent)
- *   POST   /tokens                     { email, teamId?, name, expiresIn? } a public API (v2) token for that user's team,
- *                                      shown once. expiresIn: ONE_WEEK | ONE_MONTH | THREE_MONTHS | SIX_MONTHS | ONE_YEAR.
+ *   POST   /tokens                     { email, teamId?, name, expiresIn? } a public API (v2) token for that user's team
+ *                                      (default: their shared organisation's team, else personal), shown once. expiresIn: ONE_WEEK | ONE_MONTH | THREE_MONTHS | SIX_MONTHS | ONE_YEAR.
  *
  * Documents themselves go through Documenso's own public API (/api/v2) with a token from POST /tokens.
  */
@@ -301,14 +301,14 @@ export const shiftstoneAdminRoute = new Hono()
       return c.json({ error: `expiresIn must be one of ${EXPIRY.join(', ')} (or null for none)` }, 400);
     }
 
+    // Default: their shared organisation's team (e.g. Shiftstone), else their personal team.
+    const teams = await prisma.team.findMany({
+      where: { organisation: { members: { some: { userId: user.id } } } },
+      include: { organisation: { select: { type: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
     const teamId =
-      body.teamId ??
-      (
-        await prisma.team.findFirst({
-          where: { organisation: { members: { some: { userId: user.id } } } },
-          orderBy: { createdAt: 'asc' },
-        })
-      )?.id;
+      body.teamId ?? (teams.find((t) => t.organisation.type === OrganisationType.ORGANISATION) ?? teams[0])?.id;
 
     if (!teamId) {
       return c.json({ error: 'this user has no team' }, 404);
