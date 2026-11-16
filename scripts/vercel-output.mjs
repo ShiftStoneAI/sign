@@ -47,6 +47,10 @@ const addDir = (dir) => {
 addDir('apps/remix/build/server'); // RR build, hono modules, translations (dynamic imports)
 addDir('node_modules/.prisma/client'); // generated client + query engines
 addDir('node_modules/@prisma/client');
+// Packages loaded through a `require` export condition the tracer doesn't follow.
+for (const pkg of ['@mjackson/node-fetch-server']) {
+  addDir(`node_modules/${pkg}`);
+}
 
 // Never ship test browsers or other platforms' engines.
 // Vercel's runtime is glibc x64 + Postgres via Prisma's library engine: the rest is dead weight (250 MB limit).
