@@ -75,6 +75,7 @@ declare namespace NodeJS {
     NEXT_PRIVATE_SMTP_TRANSPORT?: 'mailchannels' | 'resend' | 'smtp-auth' | 'smtp-api' | 'gmail-api';
     NEXT_PRIVATE_GMAIL_OAUTH?: string;
     CRON_SECRET?: string;
+    SHIFTSTONE_ADMIN_TOKEN?: string;
 
     NEXT_PRIVATE_RESEND_API_KEY?: string;
 

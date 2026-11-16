@@ -32,6 +32,7 @@ import { type AppContext, appContext } from './context';
 import { csrfMiddleware } from './csrf-middleware';
 import { appMiddleware } from './middleware';
 import { securityHeadersMiddleware } from './security-headers';
+import { shiftstoneAdminRoute } from './shiftstone-admin';
 import { openApiTrpcServerHandler } from './trpc/hono-trpc-open-api';
 import { reactRouterTrpcServer } from './trpc/hono-trpc-remix';
 
@@ -149,6 +150,9 @@ app.get('/api/cron/jobs', async (c) => {
 
   return c.json({ ok: true });
 });
+
+// Shiftstone: admin API for StoneBot (Bearer SHIFTSTONE_ADMIN_TOKEN); see shiftstone-admin.ts.
+app.route('/api/shiftstone/admin', shiftstoneAdminRoute);
 
 app.use('/api/trpc/*', trpcRateLimitMiddleware);
 app.use('/api/trpc/*', reactRouterTrpcServer);
