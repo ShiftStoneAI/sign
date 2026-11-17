@@ -63,6 +63,14 @@ export async function loader({ request }: Route.LoaderArgs) {
     throw redirect(returnTo || '/');
   }
 
+  // Shiftstone: the team signs in through admin.shiftstone.ai (Wen, 2026-11-16). `?password` keeps this page as a
+  // fallback for when the admin is down.
+  const shiftstoneAdmin = process.env.SHIFTSTONE_ADMIN_URL?.replace(/\/+$/, '');
+
+  if (shiftstoneAdmin && !new URL(request.url).searchParams.has('password')) {
+    throw redirect(`${shiftstoneAdmin}/admin/apps/sign${returnTo ? `?next=${encodeURIComponent(returnTo)}` : ''}`);
+  }
+
   return {
     isEmailPasswordSigninEnabled,
     isGoogleSSOEnabled,

@@ -1,9 +1,10 @@
+import { env } from '@documenso/lib/utils/env';
 import { getRootHref } from '@documenso/lib/utils/params';
 import { trpc } from '@documenso/trpc/react';
 import { cn } from '@documenso/ui/lib/utils';
 import { Button } from '@documenso/ui/primitives/button';
 import { ReadStatus } from '@prisma/client';
-import { InboxIcon, MenuIcon, SearchIcon } from 'lucide-react';
+import { ArrowLeftIcon, InboxIcon, MenuIcon, SearchIcon } from 'lucide-react';
 import { type HTMLAttributes, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router';
 
@@ -12,7 +13,7 @@ import { BrandingLogo } from '~/components/general/branding-logo';
 import { AppCommandMenu } from './app-command-menu';
 import { AppNavDesktop } from './app-nav-desktop';
 import { AppNavMobile } from './app-nav-mobile';
-import { OrgMenuSwitcher } from './org-menu-switcher';
+import { ShiftstoneAccountMenu } from './shiftstone-account-menu';
 
 export type HeaderProps = HTMLAttributes<HTMLDivElement> & {
   /** Span the full viewport width instead of the centered max-w-screen-xl container. */
@@ -61,6 +62,15 @@ export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) 
         )}
         data-testid="app-header-container"
       >
+        {/* Shiftstone: the way back to admin.shiftstone.ai, where the team signs in. */}
+        <a
+          href={`${(env('NEXT_PUBLIC_SHIFTSTONE_ADMIN_URL') || 'https://admin.shiftstone.ai').replace(/\/+$/, '')}/admin`}
+          className="hidden items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-muted-foreground text-sm hover:text-foreground md:inline-flex"
+        >
+          <ArrowLeftIcon className="h-3.5 w-3.5" />
+          Admin
+        </a>
+
         <Link
           to={getRootHref(params)}
           className="hidden rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:inline"
@@ -83,7 +93,7 @@ export const Header = ({ className, fullWidth = false, ...props }: HeaderProps) 
         </Button>
 
         <div className="md:ml-4">
-          <OrgMenuSwitcher />
+          <ShiftstoneAccountMenu />
         </div>
 
         <div className="flex flex-row items-center space-x-4 md:hidden">

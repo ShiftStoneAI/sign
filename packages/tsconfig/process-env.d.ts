@@ -76,6 +76,10 @@ declare namespace NodeJS {
     NEXT_PRIVATE_GMAIL_OAUTH?: string;
     CRON_SECRET?: string;
     SHIFTSTONE_ADMIN_TOKEN?: string;
+    SHIFTSTONE_SSO_SECRET?: string;
+    SHIFTSTONE_SSO_EMAILS?: string;
+    SHIFTSTONE_ORG_ID?: string;
+    SHIFTSTONE_ADMIN_URL?: string;
 
     NEXT_PRIVATE_RESEND_API_KEY?: string;
 

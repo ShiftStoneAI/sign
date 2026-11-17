@@ -33,6 +33,7 @@ import { csrfMiddleware } from './csrf-middleware';
 import { appMiddleware } from './middleware';
 import { securityHeadersMiddleware } from './security-headers';
 import { shiftstoneAdminRoute } from './shiftstone-admin';
+import { shiftstoneSsoRoute } from './shiftstone-sso';
 import { openApiTrpcServerHandler } from './trpc/hono-trpc-open-api';
 import { reactRouterTrpcServer } from './trpc/hono-trpc-remix';
 
@@ -151,8 +152,27 @@ app.get('/api/cron/jobs', async (c) => {
   return c.json({ ok: true });
 });
 
+// Shiftstone: one company, one organisation (Wen, 2026-11-16). The organisation list, billing, plans, new teams and
+// Documenso support pages are hidden (left in the code for upstream merges); visiting one goes home.
+const SHIFTSTONE_HIDDEN = [
+  /^\/settings\/(organisations|billing)\/?(\.data)?$/,
+  /^\/o\/[^/]+\/settings\/(billing|teams)\/?(\.data)?$/,
+  /^\/o\/[^/]+\/support\/?(\.data)?$/,
+];
+
+app.use('*', async (c, next) => {
+  if (c.req.method === 'GET' && SHIFTSTONE_HIDDEN.some((r) => r.test(c.req.path))) {
+    return c.redirect('/', 302);
+  }
+
+  await next();
+});
+
 // Shiftstone: admin API for StoneBot (Bearer SHIFTSTONE_ADMIN_TOKEN); see shiftstone-admin.ts.
 app.route('/api/shiftstone/admin', shiftstoneAdminRoute);
+
+// Shiftstone: sign in through admin.shiftstone.ai (one-minute token); see shiftstone-sso.ts.
+app.route('/api/shiftstone/sso', shiftstoneSsoRoute);
 
 app.use('/api/trpc/*', trpcRateLimitMiddleware);
 app.use('/api/trpc/*', reactRouterTrpcServer);

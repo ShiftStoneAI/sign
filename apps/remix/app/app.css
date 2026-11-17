@@ -1,5 +1,31 @@
 @import "@documenso/ui/styles/theme.css";
 
+/* Shiftstone (Wen, 2026-11-16): the admin's fonts, Atkinson Hyperlegible Next for text and Gabarito for headings.
+   Inter stays loaded for anything that asks for it by name. */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("/fonts/atkinson-next-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  src: url("/fonts/atkinson-next-italic-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gabarito";
+  src: url("/fonts/gabarito-latin.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Inter Variable Fonts */
 @font-face {
   font-family: "Inter";
@@ -64,8 +90,19 @@
 
 @layer base {
   :root {
-    --font-sans: "Inter";
+    --font-sans: "Atkinson Hyperlegible Next", "Inter";
+    --font-display: "Gabarito", "Atkinson Hyperlegible Next", "Inter";
     --font-signature: "Caveat";
     --font-noto: "Noto Sans", "Noto Sans Korean", "Noto Sans Japanese", "Noto Sans Chinese";
+  }
+}
+
+/* Shiftstone: headings in Gabarito, like the admin. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }

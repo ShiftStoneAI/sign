@@ -5,9 +5,9 @@
  *
  *   GET    /users                      everyone: id, email, name, admin, verified, password set, disabled, organisations
  *   POST   /users                      { email, name, admin?, organisationId?, role? } creates the account and emails the
- *                                      "an administrator created your account" link to set a password. With
- *                                      organisationId they join that organisation (role ADMIN|MANAGER|MEMBER, default
- *                                      MEMBER); without it they get their own personal organisation.
+ *                                      "an administrator created your account" link to set a password. They join
+ *                                      organisationId, else the shared organisation (role ADMIN|MANAGER|MEMBER, default
+ *                                      MEMBER); a personal one only if no shared organisation exists.
  *   PATCH  /users/:id                  { admin?, disabled?, name? }
  *   GET    /orgs                       organisations with plan, teams and members
  *   POST   /orgs                       { name, ownerEmail, plan? } a shared organisation + one team (plan default enterprise)
@@ -36,6 +36,8 @@ import { alphaid } from '@documenso/lib/universal/id';
 import { prisma } from '@documenso/prisma';
 import { OrganisationMemberRole, OrganisationType, Role } from '@prisma/client';
 import { Hono } from 'hono';
+
+import { sharedOrganisation } from './shiftstone-sso';
 
 const sha = (s: string) => createHash('sha256').update(s).digest();
 
@@ -129,12 +131,14 @@ export const shiftstoneAdminRoute = new Hono()
     }
 
     const user = await createAdminUser({ email, name: body.name.trim() });
+    // One company, one organisation (Wen, 2026-11-16): no organisation given = the shared one, never a personal one.
+    const organisationId = body.organisationId ?? (await sharedOrganisation())?.id;
 
-    if (body.organisationId) {
+    if (organisationId) {
       await addUserToOrganisation({
         userId: user.id,
-        organisationId: body.organisationId,
-        organisationGroups: await groupsOf(body.organisationId),
+        organisationId,
+        organisationGroups: await groupsOf(organisationId),
         organisationMemberRole: role as OrganisationMemberRole,
         bypassEmail: true,
       });

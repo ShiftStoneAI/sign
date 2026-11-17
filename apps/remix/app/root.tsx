@@ -22,7 +22,7 @@ import {
   useLoaderData,
   useMatches,
 } from 'react-router';
-import { PreventFlashOnWrongTheme, ThemeProvider, useTheme } from 'remix-themes';
+import { PreventFlashOnWrongTheme, Theme, ThemeProvider, useTheme } from 'remix-themes';
 import { nonceMiddleware } from '~/middleware/nonce';
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
@@ -76,7 +76,8 @@ export async function loader({ context, request }: Route.LoaderArgs) {
   return data(
     {
       lang,
-      theme: getTheme(),
+      // Shiftstone: light by default like the admin (Wen, 2026-11-16); dark only if someone picks it.
+      theme: getTheme() ?? Theme.LIGHT,
       disableAnimations,
       userPreferences,
       basePath: getBasePath(),

@@ -71,4 +71,6 @@ export const createPublicEnv = () => ({
       ? 'true'
       : 'false',
   NEXT_PUBLIC_OIDC_PROVIDER_LABEL: process.env.NEXT_PRIVATE_OIDC_PROVIDER_LABEL ?? '',
+  // Shiftstone: the admin the team signs in through (the account menu links back to it).
+  NEXT_PUBLIC_SHIFTSTONE_ADMIN_URL: process.env.SHIFTSTONE_ADMIN_URL ?? '',
 });

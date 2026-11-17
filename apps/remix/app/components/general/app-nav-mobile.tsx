@@ -2,6 +2,7 @@ import LogoImage from '@documenso/assets/logo.png';
 import { authClient } from '@documenso/auth/client';
 import { useOptionalCurrentOrganisation } from '@documenso/lib/client-only/providers/organisation';
 import { useSession } from '@documenso/lib/client-only/providers/session';
+import { env } from '@documenso/lib/utils/env';
 import { canAccessOrganisationAnalytics, formatOrganisationAnalyticsPath } from '@documenso/lib/utils/organisations';
 import { canExecuteTeamAction, formatAnalyticsPath } from '@documenso/lib/utils/teams';
 import { trpc } from '@documenso/trpc/react';
@@ -112,7 +113,12 @@ export const AppNavMobile = ({ isMenuOpen, onMenuOpenChange }: AppNavMobileProps
 
           <button
             className="font-semibold text-2xl text-foreground hover:text-foreground/80"
-            onClick={async () => authClient.signOut()}
+            onClick={async () =>
+              authClient.signOut({
+                // Shiftstone: back to the admin, where the team signs in.
+                redirectPath: `${(env('NEXT_PUBLIC_SHIFTSTONE_ADMIN_URL') || 'https://admin.shiftstone.ai').replace(/\/+$/, '')}/admin`,
+              })
+            }
           >
             <Trans>Sign Out</Trans>
           </button>
