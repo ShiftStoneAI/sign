@@ -123,7 +123,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className={cn('rounded-md border', className)}>
+      <div className={cn('rounded-xl border bg-card', className)}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

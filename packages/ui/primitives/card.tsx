@@ -27,7 +27,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           } as React.CSSProperties
         }
         className={cn(
-          'group relative rounded-lg border-2 bg-background text-foreground',
+          'group relative rounded-xl border-2 bg-card text-foreground', // Shiftstone: white cards on the grey page, as in the admin
           {
             'backdrop-blur-[2px]': backdropBlur,
             'gradient-border-mask before:pointer-events-none before:absolute before:-inset-[2px] before:rounded-lg before:p-[2px] before:[background:linear-gradient(var(--card-gradient-degrees),theme(colors.primary.DEFAULT/50%)_5%,theme(colors.border/80%)_30%)]':

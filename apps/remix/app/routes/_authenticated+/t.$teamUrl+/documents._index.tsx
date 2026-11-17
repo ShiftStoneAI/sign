@@ -1,11 +1,9 @@
 import { useSessionStorage } from '@documenso/lib/client-only/hooks/use-session-storage';
 import { SKIP_QUERY_BATCH_META } from '@documenso/lib/constants/trpc';
-import { formatAvatarUrl } from '@documenso/lib/utils/avatars';
 import { formatDocumentsPath } from '@documenso/lib/utils/teams';
 import { ExtendedDocumentStatus } from '@documenso/prisma/types/extended-document-status';
 import { trpc } from '@documenso/trpc/react';
 import type { TFindDocumentsInternalResponse } from '@documenso/trpc/server/document-router/find-documents-internal.types';
-import { Avatar, AvatarFallback, AvatarImage } from '@documenso/ui/primitives/avatar';
 import { Button } from '@documenso/ui/primitives/button';
 import type { RowSelectionState } from '@documenso/ui/primitives/data-table';
 import { msg } from '@lingui/core/macro';
@@ -26,6 +24,7 @@ import { EnvelopesBulkMoveDialog } from '~/components/dialogs/envelopes-bulk-mov
 import { DocumentSearch } from '~/components/general/document/document-search';
 import { EnvelopeDropZoneWrapper } from '~/components/general/envelope/envelope-drop-zone-wrapper';
 import { FolderGrid } from '~/components/general/folder/folder-grid';
+import { ShiftstoneBanner } from '~/components/general/shiftstone-banner';
 import { DocumentsTable } from '~/components/tables/documents-table';
 import { DocumentsTableEmptyState } from '~/components/tables/documents-table-empty-state';
 import { DocumentsTablePeriodFilter } from '~/components/tables/documents-table-period-filter';
@@ -179,18 +178,19 @@ export default function DocumentsPage() {
   return (
     <EnvelopeDropZoneWrapper type={EnvelopeType.DOCUMENT}>
       <div className="mx-auto w-full max-w-screen-xl px-4 md:px-8">
+        <ShiftstoneBanner
+          title={<Trans>Documents</Trans>}
+          stats={[
+            [<Trans key="all">documents</Trans>, stats[ExtendedDocumentStatus.ALL]],
+            [<Trans key="pending">waiting</Trans>, stats[ExtendedDocumentStatus.PENDING]],
+            [<Trans key="completed">signed</Trans>, stats[ExtendedDocumentStatus.COMPLETED]],
+            [<Trans key="draft">drafts</Trans>, stats[ExtendedDocumentStatus.DRAFT]],
+          ]}
+        >
+          <Trans>Documents out for e-signature. Upload a PDF, place the fields and send it for signing.</Trans>
+        </ShiftstoneBanner>
+
         <FolderGrid type={FolderType.DOCUMENT} parentId={folderId ?? null} />
-
-        <div className="mt-8 flex flex-row items-center">
-          <Avatar className="mr-3 h-12 w-12 border-2 border-white border-solid dark:border-border">
-            {team.avatarImageId && <AvatarImage src={formatAvatarUrl(team.avatarImageId)} />}
-            <AvatarFallback className="text-muted-foreground text-xs">{team.name.slice(0, 1)}</AvatarFallback>
-          </Avatar>
-
-          <h2 className="font-semibold text-4xl">
-            <Trans>Documents</Trans>
-          </h2>
-        </div>
 
         <div className="mt-8 flex flex-wrap items-center gap-x-2 gap-y-4">
           <div className="w-56">
